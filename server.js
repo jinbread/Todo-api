@@ -13,6 +13,10 @@ var todos = [{
     id: 3,
     description: 'Do some coding',
     completed: false
+},{
+    id:17,
+    description: 'Study front-end',
+    completed: true
 }];
 
 app.get('/', function(req, res) {
