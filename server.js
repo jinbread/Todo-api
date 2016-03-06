@@ -36,23 +36,9 @@ app.get('/todos', function(req, res){
     }, function(){
         res.status(500).send();
     });
-    
-//    var filteredTodos = todos;
-//    
-//    if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
-//        filteredTodos = _.where(filteredTodos, {completed: true});
-//    } else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
-//        filteredTodos = _.where(filteredTodos, {completed: false});
-//    }
-//    
-//    if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
-//        filteredTodos = _.filter(filteredTodos, function(todo) {
-//           return todo.description.indexOf(queryParams.q.toLowerCase()) > -1; 
-//        });
-//    }
-//    
-//    res.json(filteredTodos); 
+
 });
+
 // GET /todos/:id
 app.get('/todos/:id', function(req, res){
     var todoId = parseInt(req.params.id, 10);
@@ -77,24 +63,6 @@ app.post('/todos', function(req, res){
     }, function(e){
         res.status(400).json(e);
     });
-    
-    // call create on db.todo
-    //  respond with 200 and todo
-    //  res.status(400).json(e)
-    
-//    if(!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
-//        
-//        console.log("bad request");return res.status(400).send();
-//    }
-//    
-//    body.description = body.description.trim();
-//    
-//
-//    body.id = todoNextId++;
-//    
-//    todos.push(body);
-//    
-//    res.json(body);
 });
 
 // DELETE /todos/:id
@@ -124,30 +92,30 @@ app.delete('/todos/:id', function(req, res){
 
 app.put('/todos/:id', function(req, res){
     var todoId = parseInt(req.params.id, 10);
-    var matchedTodo = _.findWhere(todos, {id: todoId});
     var body = _.pick(req.body, 'description', 'completed');
-    var validAttributes = {};
-    
-    if(!matchedTodo){
-        return res.status(404).send();
-    }
-    
-    if(body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
-        validAttributes.completed = body.completed;
-    } else if(body.hasOwnProperty('completed')){
-        return res.status(400).send();
+    var attributes = {};
+        
+    if(body.hasOwnProperty('completed')) {
+        attributes.completed = body.completed;
     } 
     
-    if(body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0) {
-        validAttributes.desctiption = body.description;
-    } else if(body.hasOwnProperty('description')) {
-        return res.status(400).send();
-    }
+    if(body.hasOwnProperty('description')) {
+        attributes.description = body.description;
+    } 
     
-    // HERE
-    _.extend(matchedTodo, validAttributes);
-    res.json(matchedTodo);
-    
+    db.todo.findById(todoId).then(function (todo) {
+        if (todo) {
+            todo.update(attributes).then(function(todo) {
+                res.json(todo.toJSON());
+            }, function(e){
+                res.status(400).json(e);
+            });
+        } else {
+            res.status(404).send();
+        }
+    }, function(){
+        res.status(500).send();
+    });
 });
 
 db.sequelize.sync().then(function(){
