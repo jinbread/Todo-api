@@ -28,7 +28,7 @@ sequelize.sync({
         if(todo){
             console.log(todo.toJSON());
         } else {
-            console.log('TOdo not fountd');
+            console.log('Todo not fountd');
         }
     });
     
